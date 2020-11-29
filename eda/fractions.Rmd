@@ -1,0 +1,93 @@
+---
+title: 
+author: 
+date: "`r Sys.Date()`"
+output: 
+  github_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+# Packages
+library(tidyverse)
+library(here)
+# Parameters
+  file_data <- here("data/fractions_combined.rds")
+
+#===============================================================================
+
+# read in data
+  df <- read_rds(file_data) 
+
+```
+
+## POM fraction amounts
+
+### fPOM amounts
+```{r fPOM, echo=FALSE, warnings = FALSE}
+df %>% 
+  ggplot(aes(treatment, fPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "fPOM amount (mg/g soil)") 
+
+
+df %>% 
+  ggplot(aes(x = water_content, y = fPOM_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(0,50) + 
+  labs(x = "Water content", y = "fPOM amount (mg/g soil)") +
+  facet_wrap(.~litter)
+```
+
+Ca treatment does not affect fPOM in any water content/litter treatnebt combination 
+fPOM amount seems to decrease from begininng to end of incubation at high water content but remain similar at low water content. 
+his result fits delta13C-CO2 data that shows higher delta values at higher water content.
+
+
+### oPOM amounts 
+```{r oPOM, echo=FALSE, warnings = FALSE}
+df %>% 
+  ggplot(aes(treatment, oPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "oPOM amount (mg/g soil)") 
+
+df %>% 
+  ggplot(aes(x = water_content, y = oPOM_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(0,50) + 
+  labs(x = "Water content", y = "oPOM amount (mg/g soil)") +
+  facet_wrap(.~litter)
+```
+
+
+### Total POM amounts
+
+```{r total POM, echo=FALSE, warnings = FALSE}
+df %>% 
+  ggplot(aes(treatment, total_POM, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "Total POM amount (mg/g soil)") 
+
+df %>% 
+  ggplot(aes(x = water_content, y = total_POM, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(0,50) + 
+  labs(x = "Water content", y = "Total POM amount (mg/g soil)") +
+  facet_wrap(.~litter)
+```
