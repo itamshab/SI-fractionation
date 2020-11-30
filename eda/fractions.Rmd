@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r message=FALSE, warning=FALSE}
+```{r echo = FALSE, message=FALSE, warning=FALSE}
 # Packages
 library(tidyverse)
 library(here)
@@ -21,22 +21,41 @@ library(here)
 #===============================================================================
 
 # read in data
-  df <- read_rds(file_data) 
-
+  df <- read_rds(file_data)
+  
+  df_beg <- df %>% 
+  filter(sampling_point == "beginning")  
+  
+  df_end <- df %>% 
+  filter(sampling_point == "end") 
 ```
 
 ## POM fraction amounts
 
 ### fPOM amounts
 ```{r fPOM, echo=FALSE, warnings = FALSE}
-df %>% 
+fPOM_beg <- df_beg %>% 
+ggplot(aes(treatment, fPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "Beginning fPOM amount (mg/g soil)") 
+fPOM_beg
+
+fPOM_end <- df_end %>% 
+ggplot(aes(treatment, fPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "End fPOM amount (mg/g soil)") 
+fPOM_end
+
+fPOm_all <- df %>% 
   ggplot(aes(treatment, fPOM_dry_mg_g, fill = water_content)) + 
   geom_point(shape = 21, size = 2) + 
   facet_grid(water_content ~ litter) + theme_bw() +
   labs(x = "Preincubation treatment", y = "fPOM amount (mg/g soil)") 
+fPOm_all
 
-
-df %>% 
+fPOM_change <- df %>% 
   ggplot(aes(x = water_content, y = fPOM_dry_mg_g, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
@@ -45,6 +64,15 @@ df %>%
   ylim(0,50) + 
   labs(x = "Water content", y = "fPOM amount (mg/g soil)") +
   facet_wrap(.~litter)
+fPOM_change
+
+m1 <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
+m1_beg <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = df_beg)
+m1_end <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = df_end)
+
+summary(m1)
+summary(m1_beg)
+summary(m1_end)
 ```
 
 Ca treatment does not affect fPOM in any water content/litter treatnebt combination 
@@ -54,13 +82,28 @@ his result fits delta13C-CO2 data that shows higher delta values at higher water
 
 ### oPOM amounts 
 ```{r oPOM, echo=FALSE, warnings = FALSE}
-df %>% 
+oPOM_beg <- df_beg %>% 
+ggplot(aes(treatment, oPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(0,80) +
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "Beginning oPOM amount (mg/g soil)") 
+oPOM_beg
+
+oPOM_end <- df_end %>% 
+ggplot(aes(treatment, oPOM_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(0,80) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "End oPOM amount (mg/g soil)") 
+oPOM_end
+
+oPOM_all <- df %>% 
   ggplot(aes(treatment, oPOM_dry_mg_g, fill = water_content)) + 
-  geom_point(shape = 21, size = 2) + 
+  geom_point(shape = 21, size = 2) + ylim(0,50) +
   facet_grid(water_content ~ litter) + theme_bw() +
   labs(x = "Preincubation treatment", y = "oPOM amount (mg/g soil)") 
+oPOM_all
 
-df %>% 
+oPOM_change <- df %>% 
   ggplot(aes(x = water_content, y = oPOM_dry_mg_g, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
@@ -69,19 +112,43 @@ df %>%
   ylim(0,50) + 
   labs(x = "Water content", y = "oPOM amount (mg/g soil)") +
   facet_wrap(.~litter)
+oPOM_change
+
+m2 <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
+m2_beg <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = df_beg)
+m2_end <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = df_end)
+
+summary(m2)
+summary(m2_beg)
+summary(m2_end)
 ```
 
 
 ### Total POM amounts
 
 ```{r total POM, echo=FALSE, warnings = FALSE}
-df %>% 
+POM_beg <- df_beg %>% 
+ggplot(aes(treatment, total_POM, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(0,80) +
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "Beginning oPOM amount (mg/g soil)") 
+POM_beg
+
+POM_end <- df_end %>% 
+ggplot(aes(treatment, total_POM, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(0,80) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "End oPOM amount (mg/g soil)") 
+POM_end
+
+POM_all <- df %>% 
   ggplot(aes(treatment, total_POM, fill = water_content)) + 
-  geom_point(shape = 21, size = 2) + 
+  geom_point(shape = 21, size = 2) + ylim(0,80) +
   facet_grid(water_content ~ litter) + theme_bw() +
   labs(x = "Preincubation treatment", y = "Total POM amount (mg/g soil)") 
+POM_all
 
-df %>% 
+POM_change <- df %>% 
   ggplot(aes(x = water_content, y = total_POM, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
@@ -90,4 +157,13 @@ df %>%
   ylim(0,50) + 
   labs(x = "Water content", y = "Total POM amount (mg/g soil)") +
   facet_wrap(.~litter)
+POM_change
+
+m3 <- aov(total_POM ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
+m3_beg <- aov(total_POM ~ treatment*water_content*litter, data = df_beg)
+m3_end <- aov(total_POM ~ treatment*water_content*litter, data = df_end)
+
+summary(m3)
+summary(m3_beg)
+summary(m3_end)
 ```
