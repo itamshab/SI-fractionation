@@ -1,4 +1,4 @@
-2020-11-30
+2020-12-02
 
   - [POM fraction amounts](#pom-fraction-amounts)
       - [fPOM amounts](#fpom-amounts)
@@ -62,10 +62,11 @@
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 Ca treatment does not affect fPOM in any water content/litter treatnebt
-combination fPOM amount seems to decrease from begininng to end of
-incubation at high water content but remain similar at low water
-content. his result fits delta13C-CO2 data that shows higher delta
-values at higher water content.
+combination fPOM decreases from begininng to end of incubation at high
+water content This result fits delta13C-CO2 data that shows higher delta
+values at higher water content. fPOM somewhat increases at low water
+content - does low water content induce translocation of POM from
+occluded to free?? Isotope ratio can help identify pathway.
 
 ### oPOM amounts
 
@@ -121,6 +122,10 @@ values at higher water content.
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
+oPOM decreases from beginning to end in all conditions, especially in
+low water content when litter is added. Is this translocation to fPOM,
+or just preferentia decomposition of oPOM vs fPOM in low water content.
+
 ### Total POM amounts
 
     ## Warning: Removed 2 rows containing missing values (geom_point).
@@ -174,3 +179,10 @@ values at higher water content.
     ## Residuals                      38 1040.7    27.4                     
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Total POM (fPOM+oPOM) decrease in amount from beginning to end at high
+water content, but remain the same at low water content (although
+changes in each pool). This fits the delta 13C values and indicates POM
+is sensitive to decomposition at higher water contents. This does not
+mean C loss, it could mean relative stabilization after microbial
+processing.

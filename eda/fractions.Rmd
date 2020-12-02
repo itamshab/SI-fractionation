@@ -76,9 +76,9 @@ summary(m1_end)
 ```
 
 Ca treatment does not affect fPOM in any water content/litter treatnebt combination 
-fPOM amount seems to decrease from begininng to end of incubation at high water content but remain similar at low water content. 
-his result fits delta13C-CO2 data that shows higher delta values at higher water content.
-
+fPOM decreases from begininng to end of incubation at high water content 
+This result fits delta13C-CO2 data that shows higher delta values at higher water content.
+fPOM somewhat increases at low water content - does low water content induce translocation of POM from occluded to free?? Isotope ratio can help identify pathway.
 
 ### oPOM amounts 
 ```{r oPOM, echo=FALSE, warnings = FALSE}
@@ -123,6 +123,7 @@ summary(m2_beg)
 summary(m2_end)
 ```
 
+oPOM decreases from beginning to end in all conditions, especially in low water content when litter is added. Is this translocation to fPOM, or just preferentia decomposition of oPOM vs fPOM in low water content.
 
 ### Total POM amounts
 
@@ -167,3 +168,5 @@ summary(m3)
 summary(m3_beg)
 summary(m3_end)
 ```
+
+Total POM (fPOM+oPOM) decrease in amount from beginning to end at high water content, but remain the same at low water content (although changes in each pool). This fits the delta 13C values and indicates POM is sensitive to decomposition at higher water contents. This does not mean C loss, it could mean relative stabilization after microbial processing.
