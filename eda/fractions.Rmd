@@ -1,10 +1,14 @@
 ---
-title: 
-author: 
+title: 'null'
+author: 'null'
 date: "`r Sys.Date()`"
-output: 
+output:
+  pdf_document:
+    toc: yes
   github_document:
-    toc: true
+    toc: yes
+  word_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -15,19 +19,39 @@ knitr::opts_chunk$set(echo = TRUE)
 # Packages
 library(tidyverse)
 library(here)
+library(broom)
+library(kableExtra)
+
+mytheme <- theme_bw() + theme(panel.grid = element_blank()) + 
+  theme(axis.text.x = element_text(size = 15)) +  
+  theme(axis.text.y = element_text(size = 15)) +
+  theme(axis.title.x = element_text(size = 15)) +
+  theme(axis.title.y = element_text(size = 15)) +
+  theme(legend.text = element_text(size = 15)) +
+  theme(legend.title = element_text(size = 15)) +
+  theme(strip.text.x = element_text(size = 15))
+
 # Parameters
   file_data <- here("data/fractions_combined.rds")
+  elemental_file_data <- here("data/fractionation_elemental.rds")
 
 #===============================================================================
 
 # read in data
   df <- read_rds(file_data)
+  df$litter <- recode(df$litter, n = "No litter", y = "Litter added")
+  df$litter <- fct_relevel(df$litter, "No litter", "Litter added")
+  df$sampling_point <- recode(df$sampling_point, beginning = "Beginning", end = "End")
+  df$water_content <- recode(df$water_content, low = "Low", high = "High")
+  df$water_content <- fct_relevel(df$water_content, "low", "high")
   
   df_beg <- df %>% 
-  filter(sampling_point == "beginning")  
+  filter(sampling_point == "Beginning")  
   
   df_end <- df %>% 
-  filter(sampling_point == "end") 
+  filter(sampling_point == "End") 
+  
+  df_iso <- read_rds(elemental_file_data)
 ```
 
 ## POM fraction amounts
@@ -56,23 +80,44 @@ fPOm_all <- df %>%
 fPOm_all
 
 fPOM_change <- df %>% 
+  filter(sampling_point != "initial") %>% 
   ggplot(aes(x = water_content, y = fPOM_dry_mg_g, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
   geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
   theme_bw(base_size = 16) + 
   ylim(0,50) + 
-  labs(x = "Water content", y = "fPOM amount (mg/g soil)") +
-  facet_wrap(.~litter)
-fPOM_change
+  labs(x = "Water content", y = "fPOM amount (mg/g soil)", fill = "Sampling time") +
+  facet_wrap(.~litter) +
+  scale_fill_brewer(palette = "Set1")
+fPOM_change + mytheme
 
-m1 <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
-m1_beg <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = df_beg)
-m1_end <- aov(fPOM_dry_mg_g ~ treatment*water_content*litter, data = df_end)
+fPOM_change_litter <- df %>% 
+  filter(sampling_point != "initial" & litter == "Litter added") %>% 
+  ggplot(aes(x = water_content, y = fPOM_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025),
+             alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(0,50) + 
+  labs(x = "Water content", y = "fPOM amount (mg/g soil)", fill = "Sampling time") +
+  scale_fill_brewer(palette = "Set1")
+fPOM_change_litter + mytheme
+
+m1 <- aov(fPOM_dry_mg_g ~ sampling_point*water_content, data = filter(df, sampling_point != "initial" & litter != "No Litter"))
+m1_beg <- aov(fPOM_dry_mg_g ~ water_content*litter, data = df_beg)
+m1_end <- aov(fPOM_dry_mg_g ~ water_content*litter, data = df_end)
 
 summary(m1)
+tbl_fpom_amount <- 
+  tidy(m1, digits = 3) %>% 
+  kable(digits = 4)
+tbl_fpom_amount
 summary(m1_beg)
 summary(m1_end)
+TukeyHSD(m1)
+TukeyHSD(m1_end)
+TukeyHSD(m1_beg)
 ```
 
 Ca treatment does not affect fPOM in any water content/litter treatnebt combination 
@@ -104,23 +149,47 @@ oPOM_all <- df %>%
 oPOM_all
 
 oPOM_change <- df %>% 
+  filter(sampling_point != "initial") %>% 
   ggplot(aes(x = water_content, y = oPOM_dry_mg_g, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
   geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
   theme_bw(base_size = 16) + 
   ylim(0,50) + 
-  labs(x = "Water content", y = "oPOM amount (mg/g soil)") +
-  facet_wrap(.~litter)
-oPOM_change
+  labs(x = "Water content", y = "oPOM amount (mg/g soil)", fill = "Sampling time") +
+  facet_wrap(.~litter) +
+  scale_fill_brewer(palette = "Set1")
+oPOM_change + mytheme
 
-m2 <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
-m2_beg <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = df_beg)
-m2_end <- aov(oPOM_dry_mg_g ~ treatment*water_content*litter, data = df_end)
+oPOM_change_litter <- df %>% 
+  filter(sampling_point != "initial" & litter == "Litter added") %>% 
+  ggplot(aes(x = water_content, y = oPOM_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), 
+             alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(0,50) + 
+  labs(x = "Water content",
+       y = "oPOM amount (mg/g soil)",
+       fill = "Sampling time") +
+  scale_fill_brewer(palette = "Set1")
+oPOM_change_litter + mytheme
+
+
+m2 <- aov(oPOM_dry_mg_g ~ water_content*sampling_point, data = filter(df, sampling_point != "initial"))
+m2_beg <- aov(oPOM_dry_mg_g ~ water_content*litter, data = df_beg)
+m2_end <- aov(oPOM_dry_mg_g ~ water_content*litter, data = df_end)
 
 summary(m2)
+tbl_opom_amounts <- 
+  kable(tidy(m2, digits = 3))
 summary(m2_beg)
 summary(m2_end)
+tbl_opom_amounts
+TukeyHSD(m2)
+TukeyHSD(m2_end)
+TukeyHSD(m2_beg)
 ```
 
 oPOM decreases from beginning to end in all conditions, especially in low water content when litter is added. Is this translocation to fPOM, or just preferentia decomposition of oPOM vs fPOM in low water content.
@@ -150,23 +219,100 @@ POM_all <- df %>%
 POM_all
 
 POM_change <- df %>% 
+  filter(sampling_point != "initial") %>% 
   ggplot(aes(x = water_content, y = total_POM, fill = sampling_point)) +
   geom_boxplot(outlier.shape = NA) + 
   labs(fill = "sampling_point") + 
   geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
   theme_bw(base_size = 16) + 
-  ylim(0,50) + 
-  labs(x = "Water content", y = "Total POM amount (mg/g soil)") +
-  facet_wrap(.~litter)
-POM_change
+  ylim(0,70) + 
+  labs(x = "Water content", y = "Total POM amount (mg/g soil)", fill = "Sampling time") +
+  facet_wrap(.~litter) + 
+  scale_fill_brewer(palette = "Set1")
+POM_change + mytheme
 
-m3 <- aov(total_POM ~ treatment*water_content*litter, data = filter(df, sampling_point != "initial"))
-m3_beg <- aov(total_POM ~ treatment*water_content*litter, data = df_beg)
-m3_end <- aov(total_POM ~ treatment*water_content*litter, data = df_end)
+m3 <- aov(total_POM ~ sampling_point*water_content, data = filter(df, sampling_point != "initial" & litter != "No Litter"))
+m3_beg <- aov(total_POM ~ water_content*litter, data = df_beg)
+m3_end <- aov(total_POM ~ water_content*litter, data = df_end)
 
 summary(m3)
 summary(m3_beg)
 summary(m3_end)
+TukeyHSD(m3)
+TukeyHSD(m3_end)
+TukeyHSD(m3_beg)
 ```
 
 Total POM (fPOM+oPOM) decrease in amount from beginning to end at high water content, but remain the same at low water content (although changes in each pool). This fits the delta 13C values and indicates POM is sensitive to decomposition at higher water contents. This does not mean C loss, it could mean relative stabilization after microbial processing.
+
+```{r MAOM, echo=FALSE, warnings = FALSE}
+SC_beg <- df_beg %>% 
+ggplot(aes(treatment, SC_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(800,900) +
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "Beginning SC amount (mg/g soil)") 
+SC_beg
+
+SC_end <- df_end %>% 
+ggplot(aes(treatment, SC_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(800,900) + 
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "End SC amount (mg/g soil)") 
+SC_end
+
+SC_all <- df %>% 
+  ggplot(aes(treatment, SC_dry_mg_g, fill = water_content)) + 
+  geom_point(shape = 21, size = 2) + ylim(800,900) +
+  facet_grid(water_content ~ litter) + theme_bw() +
+  labs(x = "Preincubation treatment", y = "SC amount (mg/g soil)") 
+SC_all
+
+SC_change <- df %>% 
+  filter(sampling_point != "initial") %>% 
+  ggplot(aes(x = water_content, y = SC_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(800,900) + 
+  labs(x = "Water content", y = "SC amount (mg/g soil)", fill = "Sampling time") +
+  facet_wrap(.~litter) +
+  scale_fill_brewer(palette = "Set1")
+SC_change + mytheme
+
+SC_change_litter <- df %>% 
+  filter(sampling_point != "initial" & litter == "Litter added") %>% 
+  ggplot(aes(x = water_content, y = SC_dry_mg_g, fill = sampling_point)) +
+  geom_boxplot(outlier.shape = NA) + 
+  labs(fill = "sampling_point") + 
+  geom_point(position = position_jitterdodge(jitter.width = 0.025), 
+             alpha = 0.3, size = 2) +
+  theme_bw(base_size = 16) + 
+  ylim(800,900) + 
+  labs(x = "Water content",
+       y = "SC amount (mg/g soil)",
+       fill = "Sampling time") +
+  scale_fill_brewer(palette = "Set1")
+SC_change_litter + mytheme
+
+
+m4 <- aov(SC_dry_mg_g ~ water_content*sampling_point, data = filter(df, sampling_point != "initial"))
+m4_beg <- aov(SC_dry_mg_g ~ water_content*litter, data = df_beg)
+m4_end <- aov(SC_dry_mg_g ~ water_content*litter, data = df_end)
+
+summary(m4)
+summary(m4_beg)
+summary(m4_end)
+
+TukeyHSD(m4)
+TukeyHSD(m4_end)
+TukeyHSD(m4_beg)
+```
+
+```{r elemental, echo= FALSE, warnings = FALSE}
+ggplot(filter(df_iso, sampling_point == "beginning" & litter == "y"), aes(treatment, delta13C)) + 
+  geom_boxplot() + geom_jitter(aes(color = treatment)) +
+  facet_grid(fraction ~ water_content, scales = "free") + 
+  theme_bw()# + ylim(250,1250)
+```
+
